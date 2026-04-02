@@ -1,0 +1,99 @@
+---
+title: "WiFi Attacks"
+description: Capturing and cracking WPA/WPA2 handshakes
+---
+
+<Warning>
+  Only perform these operations on networks you own or have explicit written permission to test. Unauthorized interception and cracking of wireless communications is illegal in most jurisdictions.
+</Warning>
+
+WPA/WPA2 attacks work by capturing the 4-way handshake that occurs when a client authenticates to an access point, then cracking the pre-shared key offline using a wordlist or brute-force approach.
+
+## Full capture and crack workflow
+
+<Steps>
+  <Step title="Start monitor mode">
+    Enable monitor mode on your interface (menu option 1). Your interface will become `wlan0mon`.
+  </Step>
+  <Step title="Scan networks to find your target">
+    Run a network scan (menu option 3) to identify the target BSSID and channel.
+  </Step>
+  <Step title="Capture the handshake (menu option 4)">
+    Select option 4 and provide the following when prompted:
+
+    - **Interface**: your monitor-mode interface (e.g., `wlan0mon`)
+    - **BSSID**: the target access point's MAC address
+    - **Channel**: the AP's operating channel
+    - **Output path**: where to save the capture file (e.g., `/tmp/capture`)
+    - **Number of deauth packets**: how many deauthentication frames to send (e.g., `5`)
+
+    The tool runs:
+
+    ```bash
+    airodump-ng wlan0mon --bssid AA:BB:CC:DD:EE:FF -c 6 -w /tmp/capture | xterm -e aireplay-ng -0 5 -a AA:BB:CC:DD:EE:FF wlan0mon
+    ```
+
+    Two processes run simultaneously:
+
+    - `airodump-ng` locks onto the target channel and records frames. When it sees the 4-way handshake, it saves a `.cap` file to the specified path.
+    - `aireplay-ng -0` sends deauthentication frames to connected clients, forcing them to disconnect and reconnect, which triggers a new handshake.
+
+    The capture file will be written as `<path>-01.cap` (e.g., `/tmp/capture-01.cap`).
+  </Step>
+  <Step title="Crack the handshake">
+    Choose a cracking method (options 6, 7, or 8) depending on what you have available.
+  </Step>
+</Steps>
+
+## Cracking methods
+
+### Crack with rockyou.txt (menu option 6)
+
+Prompt: path to the `.cap` handshake file.
+
+```bash
+aircrack-ng /tmp/capture-01.cap -w /usr/share/wordlists/rockyou.txt
+```
+
+<Note>
+  On Debian/Ubuntu-based systems, `rockyou.txt` is located at `/usr/share/wordlists/rockyou.txt`. It may be compressed as `rockyou.txt.gz`. Decompress it first if needed:
+
+  ```bash
+  sudo gzip -d /usr/share/wordlists/rockyou.txt.gz
+  ```
+</Note>
+
+### Crack with a custom wordlist (menu option 7)
+
+Prompts: handshake file path, path to your wordlist.
+
+```bash
+aircrack-ng /tmp/capture-01.cap -w /path/to/custom-wordlist.txt
+```
+
+### Crack by ESSID (menu option 8)
+
+Prompts: handshake file path, ESSID (network name).
+
+```bash
+aircrack-ng /tmp/capture-01.cap -e "NetworkName"
+```
+
+The `-e` flag filters the capture file by ESSID (network name) rather than BSSID. This is useful when a `.cap` file contains handshakes from multiple networks — it tells aircrack-ng which network's handshake to target. A wordlist is still required for cracking; if no wordlist is found on the system, the command will report that no dictionary was supplied. Use option 7 to specify a wordlist explicitly.
+
+## Create a custom wordlist (menu option 9)
+
+If you want to generate a targeted wordlist based on known character sets or length ranges, use the built-in crunch integration.
+
+Prompts:
+
+- **Min length**: minimum password length
+- **Max length**: maximum password length
+- **Characters**: character set to use
+- **Output path**: file path for the generated wordlist
+
+```bash
+crunch 8 12 abcdefghijklmnopqrstuvwxyz0123456789 -o /tmp/wordlist.txt
+```
+
+This generates every combination of lowercase letters and digits between 8 and 12 characters long and saves the output to `/tmp/wordlist.txt`. Large character sets and length ranges produce very large files.

@@ -1,0 +1,83 @@
+---
+title: "Supported Platforms"
+description: Operating systems and environments where WiFi Hacking runs.
+---
+
+## Platform support
+
+| Platform | Package manager | Notes |
+|----------|----------------|-------|
+| Kali Linux | apt | Primary platform. Most tools are pre-installed or available via apt. |
+| BlackArch Linux | pacman | Full support. Install equivalent packages from the BlackArch repository. |
+| Ubuntu | apt | Supported. Run menu option 5 to install all required tools. |
+| Parrot OS | apt | Supported. Security edition includes many tools by default. |
+| Kali NetHunter | apt | Supported. Android-based Kali; requires a compatible wireless adapter. |
+| Termux (Rooted Android) | apt (Termux) | Supported with additional setup steps. Root access required. |
+
+---
+
+## Installation by platform
+
+### Kali Linux, Ubuntu, and Parrot OS
+
+```bash
+sudo apt-get update && apt-get install git
+git clone https://github.com/akashblackhat/wifi-hacking.py.git
+cd wifi-hacking.py
+sudo python3 wifi-hacking.py
+```
+
+After the script starts, select **option 5** to install all required tools if they are not already present.
+
+### BlackArch Linux
+
+Install the required tools via pacman using their BlackArch package names, then run the script:
+
+```bash
+git clone https://github.com/akashblackhat/wifi-hacking.py.git
+cd wifi-hacking.py
+sudo python3 wifi-hacking.py
+```
+
+### Root Termux (Rooted Android)
+
+```bash
+apt update
+apt install git
+apt install python
+apt install python3
+apt install cmatrix
+git clone https://github.com/akashblackhat/wifi-hacking.py.git
+cd wifi-hacking.py
+python3 wifi-hacking.py
+```
+
+<Note>
+  Root access is required on Termux to run airmon-ng, airodump-ng, and other tools that need raw socket access. Tools that depend on a display server (such as xterm for command 4) may not work in Termux without additional configuration.
+</Note>
+
+---
+
+## Wireless adapter requirements
+
+Most built-in laptop Wi-Fi cards do not support monitor mode or packet injection, which are required for the wireless attack commands (1–4, 10, 14). A compatible external USB wireless adapter is necessary for those features.
+
+<Note>
+  Common compatible adapters and chipsets:
+
+  - **Alfa AWUS036ACH** — AC1200, dual-band, widely supported
+  - **Alfa AWUS036NHA** with Atheros AR9271 chipset — 802.11n, strong monitor mode support
+  - **TP-Link TL-WN722N v1** with Atheros AR9271 chipset — budget option; note that v2 and v3 use a different chipset and do not support injection
+</Note>
+
+To verify that your adapter supports monitor mode, run:
+
+```bash
+iw list | grep -A 10 "Supported interface modes"
+```
+
+Look for `monitor` in the output. To verify packet injection support:
+
+```bash
+aireplay-ng --test <interface>
+```

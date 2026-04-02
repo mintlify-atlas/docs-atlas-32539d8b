@@ -1,0 +1,111 @@
+---
+title: "Troubleshooting"
+description: Solutions to common issues with WiFi Hacking
+---
+
+<AccordionGroup>
+  <Accordion title='"command not found" errors'>
+    **Cause:** Required tools are not installed.
+
+    **Solution:** Run option 5 (Install wireless tools) from the menu, or install manually:
+
+    ```bash
+    sudo apt-get install -y aircrack-ng reaver nmap
+    ```
+  </Accordion>
+
+  <Accordion title="Monitor mode fails to start">
+    **Cause:** Wireless adapter doesn't support monitor mode, or a driver issue is present.
+
+    **Solution:** Check adapter support with:
+
+    ```bash
+    iw list | grep "Supported interface modes" -A 8
+    ```
+
+    Look for `monitor` in the output. Then try running the following manually before starting monitor mode:
+
+    ```bash
+    sudo airmon-ng check kill
+    ```
+  </Accordion>
+
+  <Accordion title="airodump-ng shows no networks">
+    **Cause:** Interface is not in monitor mode, or the wrong interface name is being used.
+
+    **Solution:** Confirm the interface name:
+
+    ```bash
+    iwconfig
+    ip link
+    ```
+
+    After starting monitor mode, the interface is typically renamed to `{interface}mon` (e.g., `wlan0mon`). Use the new name for scanning.
+  </Accordion>
+
+  <Accordion title="Handshake not captured">
+    **Cause:** The target device didn't reconnect after deauthentication, or too few deauth packets were sent.
+
+    **Solution:** Increase the number of deauth packets (try 10–20). Confirm there are active clients on the network — airodump-ng shows the client count in the STATION section. Try running the capture for a longer duration.
+  </Accordion>
+
+  <Accordion title="aircrack-ng finds no handshake in .cap file">
+    **Cause:** The capture file does not contain a valid 4-way WPA handshake.
+
+    **Solution:** Verify the capture file:
+
+    ```bash
+    aircrack-ng /path/to/capture.cap
+    ```
+
+    If no handshake is found, re-run option 4 to capture again.
+  </Accordion>
+
+  <Accordion title="rockyou.txt not found">
+    **Cause:** The `wordlists` package is not installed, or `rockyou.txt` is still gzipped.
+
+    **Solution:**
+
+    ```bash
+    sudo apt-get install -y wordlists && sudo gunzip /usr/share/wordlists/rockyou.txt.gz
+    ```
+  </Accordion>
+
+  <Accordion title='Reaver WPS attack returns "WPS transaction failed" repeatedly'>
+    **Cause:** The router has WPS lockout enabled or WPS is disabled.
+
+    **Solution:** Some routers lock out after failed attempts. Wait 30–60 minutes and retry. Verify WPS is enabled on the target by checking the `WPS` column in the airodump-ng output.
+  </Accordion>
+
+  <Accordion title='"xterm: command not found" during handshake capture'>
+    **Cause:** `xterm` is not installed.
+
+    **Solution:**
+
+    ```bash
+    sudo apt-get install -y xterm
+    ```
+  </Accordion>
+
+  <Accordion title="Script must be run with sudo">
+    **Cause:** Most wireless operations require root privileges.
+
+    **Solution:** Always run the script with `sudo`:
+
+    ```bash
+    sudo python3 wifi-hacking.py
+    ```
+  </Accordion>
+
+  <Accordion title="Internet lost after stopping monitor mode">
+    **Cause:** Network manager was stopped and has not restarted yet.
+
+    **Solution:** Restart the network manager manually:
+
+    ```bash
+    sudo service network-manager restart
+    ```
+
+    <Note>This command is included in `stop_monitor_mode` automatically, but may need a few seconds to take effect.</Note>
+  </Accordion>
+</AccordionGroup>

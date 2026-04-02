@@ -1,0 +1,143 @@
+---
+title: "Advanced Tools"
+description: "Metasploit, Hydra, Wifiphisher, Nikto, Netcat, Gobuster, and SQLMap."
+---
+
+WiFi Hacking includes seven additional tools beyond wireless attacks, covering the full post-exploitation and web application testing workflow.
+
+<Warning>
+  All tools on this page must only be used against systems you own or have explicit written authorization to test.
+</Warning>
+
+<AccordionGroup>
+  <Accordion title="Option 12 — Run Metasploit exploit">
+    Launches the Metasploit Framework console and immediately executes a named exploit module.
+
+    **Prompt:**
+    ```
+    Enter the Metasploit exploit name: exploit/multi/handler
+    ```
+
+    **Underlying command:**
+    ```bash
+    msfconsole -x 'use exploit/multi/handler; run'
+    ```
+
+    The `-x` flag passes commands directly to msfconsole on startup. This is useful for running a known exploit against a target or setting up a listener to catch a reverse shell. Replace `exploit/multi/handler` with any valid Metasploit module path.
+
+    <Tip>
+      To search for available modules, open msfconsole manually (`sudo msfconsole`) and run `search <keyword>`.
+    </Tip>
+  </Accordion>
+
+  <Accordion title="Option 13 — Brute-force SSH login with Hydra">
+    Runs a dictionary attack against an SSH login on the target host.
+
+    **Prompts:**
+    ```
+    Enter the target IP for Hydra brute-force: 192.168.1.10
+    Enter the username: admin
+    Enter the password file path: /usr/share/wordlists/rockyou.txt
+    ```
+
+    **Underlying command:**
+    ```bash
+    hydra -l admin -P /usr/share/wordlists/rockyou.txt 192.168.1.10 ssh
+    ```
+
+    `-l` specifies a single username; `-P` provides a password wordlist file. The protocol is hardcoded to `ssh`.
+
+    <Note>
+      rockyou.txt must be unzipped first if not already: `sudo gunzip /usr/share/wordlists/rockyou.txt.gz`
+    </Note>
+  </Accordion>
+
+  <Accordion title="Option 14 — Phishing attack with Wifiphisher">
+    Creates a rogue access point cloning the target network, deauthenticates clients from the real AP, and serves a credential-capture portal to victims who reconnect.
+
+    **Prompts:**
+    ```
+    Enter the interface: wlan0mon
+    Enter the BSSID: AA:BB:CC:DD:EE:FF
+    ```
+
+    **Underlying command:**
+    ```bash
+    wifiphisher -i wlan0mon --fakeap -b AA:BB:CC:DD:EE:FF
+    ```
+
+    `--fakeap` creates a fake AP; `-b` targets the specific BSSID. Victims connecting to the rogue AP are presented with a phishing page (e.g., a fake firmware upgrade prompt) that captures their Wi-Fi password.
+  </Accordion>
+
+  <Accordion title="Option 15 — Web server scan with Nikto">
+    Scans a web server for known vulnerabilities, outdated software versions, dangerous default files, and common misconfigurations.
+
+    **Prompt:**
+    ```
+    Enter the target URL: http://192.168.1.1
+    ```
+
+    **Underlying command:**
+    ```bash
+    nikto -h http://192.168.1.1
+    ```
+
+    Nikto checks for thousands of potential issues and outputs findings to the terminal. Useful as a quick first pass against a discovered web server.
+  </Accordion>
+
+  <Accordion title="Option 16 — Listen with Netcat">
+    Opens a TCP listener on the specified port. Used to catch incoming reverse shell connections from an exploited target.
+
+    **Prompt:**
+    ```
+    Enter the port to listen on: 4444
+    ```
+
+    **Underlying command:**
+    ```bash
+    nc -lvp 4444
+    ```
+
+    `-l` listen mode, `-v` verbose, `-p` port. When a reverse shell connects, you get an interactive shell session in the terminal.
+  </Accordion>
+
+  <Accordion title="Option 17 — Directory brute-force with Gobuster">
+    Enumerates hidden directories and files on a web server using a wordlist.
+
+    **Prompt:**
+    ```
+    Enter the target URL: http://192.168.1.1
+    ```
+
+    **Underlying command:**
+    ```bash
+    gobuster dir -u http://192.168.1.1 -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
+    ```
+
+    Uses the DirBuster medium wordlist (~220,000 entries). Results show discovered paths with their HTTP status codes (200 = found, 301/302 = redirect, 403 = forbidden but exists).
+
+    <Note>
+      The wordlist path `/usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt` is hardcoded. Install it with: `sudo apt-get install -y wordlists`
+    </Note>
+  </Accordion>
+
+  <Accordion title="Option 18 — SQL injection with SQLMap">
+    Automatically detects and exploits SQL injection vulnerabilities in web application URLs.
+
+    **Prompt:**
+    ```
+    Enter the target URL for SQL Injection: http://192.168.1.1/login?id=1
+    ```
+
+    **Underlying command:**
+    ```bash
+    sqlmap -u "http://192.168.1.1/login?id=1" --batch
+    ```
+
+    `--batch` uses default answers to all prompts so the scan runs non-interactively. SQLMap tests the URL's parameters for injection points and, if found, attempts to enumerate the database.
+
+    <Tip>
+      The target URL should contain a query parameter (e.g., `?id=1`) for SQLMap to test. SQLMap will not find injection points on URLs with no parameters.
+    </Tip>
+  </Accordion>
+</AccordionGroup>

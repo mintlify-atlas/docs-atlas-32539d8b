@@ -1,0 +1,98 @@
+---
+title: "Monitor Mode"
+description: Managing wireless monitor mode with airmon-ng
+---
+
+Monitor mode is a special operating mode for wireless adapters that allows the interface to capture all 802.11 frames in the air — not just frames addressed to your adapter. This is required for passive network scanning, handshake capture, and most wireless auditing tasks.
+
+<Warning>
+  Enabling monitor mode kills processes like NetworkManager and wpa_supplicant that manage your internet connection. Your machine will lose network connectivity until you stop monitor mode and restart those services.
+</Warning>
+
+<Tip>
+  Before starting, verify your adapter supports monitor mode by running `iw list` and looking for `monitor` in the "Supported interface modes" section.
+</Tip>
+
+## Start monitor mode
+
+**Menu option 1**
+
+<Steps>
+  <Step title="Select option 1 from the main menu">
+    The tool will prompt you to enter your wireless interface name.
+  </Step>
+  <Step title="Enter your interface name">
+    Provide the name of your wireless interface, for example `wlan0`.
+  </Step>
+  <Step title="airmon-ng starts the interface in monitor mode">
+    The tool runs:
+
+    ```bash
+    airmon-ng start wlan0 && airmon-ng check kill
+    ```
+
+    - `airmon-ng start wlan0` puts the interface into monitor mode.
+    - `airmon-ng check kill` detects and terminates interfering processes (NetworkManager, wpa_supplicant, dhclient) before switching modes.
+
+    After this command completes, your interface is renamed to `wlan0mon`.
+  </Step>
+</Steps>
+
+## Stop monitor mode
+
+**Menu option 2**
+
+<Steps>
+  <Step title="Select option 2 from the main menu">
+    The tool will prompt you to enter the monitor-mode interface name.
+  </Step>
+  <Step title="Enter the monitor-mode interface name">
+    Provide the monitor interface name, for example `wlan0mon`.
+  </Step>
+  <Step title="airmon-ng restores managed mode">
+    The tool runs:
+
+    ```bash
+    airmon-ng stop wlan0mon && service network-manager restart
+    ```
+
+    - `airmon-ng stop wlan0mon` restores the interface to managed mode (the interface name reverts to `wlan0`).
+    - `service network-manager restart` brings NetworkManager back up so normal connectivity resumes.
+  </Step>
+</Steps>
+
+## Scan networks
+
+**Menu option 3**
+
+<Steps>
+  <Step title="Ensure monitor mode is active">
+    You must have already started monitor mode (option 1) before scanning. Use the `wlan0mon` interface.
+  </Step>
+  <Step title="Select option 3 from the main menu">
+    Enter the monitor-mode interface name when prompted (e.g., `wlan0mon`).
+  </Step>
+  <Step title="airodump-ng lists nearby networks">
+    The tool runs:
+
+    ```bash
+    airodump-ng wlan0mon -M
+    ```
+
+    The output displays a live table of nearby access points. Key columns:
+
+    | Column  | Description                                           |
+    | ------- | ----------------------------------------------------- |
+    | BSSID   | MAC address of the access point                       |
+    | PWR     | Signal strength (negative dBm; closer to 0 is stronger) |
+    | Beacons | Number of beacon frames received                      |
+    | #Data   | Number of data frames captured                        |
+    | CH      | Channel the AP is operating on                        |
+    | ENC     | Encryption type (WPA2, WPA, WEP, OPN)                 |
+    | CIPHER  | Cipher in use (CCMP, TKIP, etc.)                      |
+    | AUTH    | Authentication method (PSK, MGT, etc.)                |
+    | ESSID   | Network name (SSID)                                   |
+
+    Take note of the BSSID and channel values — you will need them for handshake capture and attacks.
+  </Step>
+</Steps>

@@ -1,0 +1,97 @@
+---
+title: "Dependencies"
+description: Tools installed and required by WiFi Hacking.
+---
+
+## Installation
+
+Menu option **5 (Install wireless tools)** installs all required packages in sequence using `apt-get`:
+
+```bash
+sudo apt-get install -y <package>
+```
+
+Each package is installed individually. To install all dependencies at once manually:
+
+```bash
+sudo apt-get install -y aircrack-ng crunch xterm wordlists reaver pixiewps bully wifite airodump-ng nmap metasploit-framework hydra wifiphisher nikto netcat gobuster ncat sqlmap
+```
+
+---
+
+## Tool reference
+
+| Package | Purpose | Used by menu option(s) |
+|---------|---------|------------------------|
+| `aircrack-ng` | WPA/WPA2 handshake cracking | 6, 7, 8 |
+| `crunch` | Wordlist generation | 9 |
+| `xterm` | GUI terminal emulator (required for split-window handshake capture) | 4 |
+| `wordlists` | Collection of wordlists including rockyou.txt and DirBuster lists | 6, 17 |
+| `reaver` | WPS PIN brute-force attack | 10 |
+| `pixiewps` | Offline WPS PIN attack (Pixie Dust) | _(dependency of reaver)_ |
+| `bully` | Alternative WPS brute-force tool | _(installed for coverage)_ |
+| `wifite` | Automated wireless attack suite | _(installed for coverage)_ |
+| `airodump-ng` | Wireless packet capture and network scanning | 1, 2, 3, 4 |
+| `nmap` | Network host and port scanning | 11 |
+| `metasploit-framework` | Exploit framework (msfconsole) | 12 |
+| `hydra` | Network login brute-force tool | 13 |
+| `wifiphisher` | Rogue AP and phishing attack tool | 14 |
+| `nikto` | Web server vulnerability scanner | 15 |
+| `netcat` | TCP/UDP networking utility (listener/connector) | 16 |
+| `gobuster` | Directory and file enumeration | 17 |
+| `ncat` | Improved Netcat from the Nmap project | _(installed for coverage)_ |
+| `sqlmap` | Automated SQL injection tool | 18 |
+
+---
+
+## Individual package installation
+
+To install a single package without running the full tool installer:
+
+```bash
+sudo apt-get install -y <package-name>
+```
+
+For example, to install only aircrack-ng:
+
+```bash
+sudo apt-get install -y aircrack-ng
+```
+
+---
+
+## Notes on specific packages
+
+### wordlists and rockyou.txt
+
+The `wordlists` package installs rockyou.txt at `/usr/share/wordlists/rockyou.txt`. On some systems it is shipped compressed and must be unzipped before use:
+
+```bash
+sudo gunzip /usr/share/wordlists/rockyou.txt.gz
+```
+
+Menu option 6 (Crack handshake with rockyou.txt) hardcodes this path. If the file is not present or still compressed, the command will fail silently.
+
+The DirBuster medium wordlist used by menu option 17 is located at:
+
+```text
+/usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
+```
+
+This file is also included in the `wordlists` package.
+
+### xterm
+
+`xterm` is a GUI dependency required by menu option 4 (Capture handshake). The command pipes airodump-ng output while simultaneously spawning aireplay-ng in a separate xterm window. If xterm is not installed or a display server is unavailable (e.g., headless systems), command 4 will fail.
+
+<Note>
+  On headless servers without a display, set the `DISPLAY` environment variable or use a virtual framebuffer (`Xvfb`) to satisfy xterm's display requirement.
+</Note>
+
+### airodump-ng
+
+`airodump-ng` is part of the `aircrack-ng` suite on most distributions. Installing the `aircrack-ng` package (option 6, 7, 8) typically also installs airodump-ng. The package is listed separately in the installer for systems where they are distributed independently.
+
+### metasploit-framework
+
+The Metasploit Framework package can be large (several hundred MB). On Kali Linux it is pre-installed. On Ubuntu or Parrot OS it may take several minutes to download and configure.

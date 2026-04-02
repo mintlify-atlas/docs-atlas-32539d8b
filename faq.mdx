@@ -1,0 +1,82 @@
+---
+title: "FAQ"
+description: Frequently asked questions about WiFi Hacking
+---
+
+<AccordionGroup>
+  <Accordion title="Is this tool legal to use?">
+    WiFi Hacking is a penetration testing toolkit. It is only legal to use against networks and systems you own or have explicit written permission to test.
+
+    <Warning>Unauthorized access to computer networks violates laws such as the Computer Fraud and Abuse Act (US), Computer Misuse Act (UK), and similar statutes in most countries.</Warning>
+  </Accordion>
+
+  <Accordion title="What wireless adapters are compatible?">
+    You need an adapter that supports monitor mode and packet injection. Well-tested compatible adapters include:
+
+    - Alfa AWUS036ACH (Realtek RTL8812AU)
+    - Alfa AWUS036NHA (Atheros AR9271)
+    - TP-Link TL-WN722N **v1 only** (Atheros AR9271) — v2/v3 use a different chipset and do not support injection
+    - Panda PAU09 (Ralink RT5572)
+
+    <Note>Your laptop's built-in Wi-Fi adapter almost never supports packet injection.</Note>
+  </Accordion>
+
+  <Accordion title="Does this tool work on Windows or macOS?">
+    No. The underlying tools (aircrack-ng, reaver, wifiphisher, etc.) are Linux-only. The tool runs on:
+
+    - Kali Linux
+    - Ubuntu
+    - Parrot OS
+    - BlackArch
+    - Kali NetHunter
+    - Rooted Termux
+  </Accordion>
+
+  <Accordion title="Can I use this on Termux without root?">
+    No. Monitor mode and packet injection require root access to the wireless driver. Termux on a non-rooted device cannot grant these permissions.
+  </Accordion>
+
+  <Accordion title="Why does my interface get renamed after starting monitor mode?">
+    When airmon-ng puts an interface into monitor mode, it creates a virtual monitor interface typically named `{original}mon`. For example, `wlan0` becomes `wlan0mon`. Use this new name for all subsequent commands.
+  </Accordion>
+
+  <Accordion title="The WPS attack is very slow — is that normal?">
+    Yes. A full WPS PIN brute force can take several hours. The 8-digit WPS PIN is split into two 4-digit halves, but many routers implement rate limiting or lockout.
+
+    <Tip>Reaver's `-vv` flag shows progress. Some modern routers have WPS disabled or locked down entirely.</Tip>
+  </Accordion>
+
+  <Accordion title="How do I know if a network uses WPS?">
+    In the airodump-ng scan output, look for `WPS` in the FLAGS column. Alternatively, scan specifically for WPS-enabled networks:
+
+    ```bash
+    wash -i wlan0mon
+    ```
+  </Accordion>
+
+  <Accordion title="Can I crack WPA3?">
+    No. WPA3 uses Simultaneous Authentication of Equals (SAE), which is not vulnerable to the offline dictionary attacks used by aircrack-ng. This tool targets WEP, WPS, WPA, and WPA2 (TKIP/CCMP).
+  </Accordion>
+
+  <Accordion title="Where are captured handshake files saved?">
+    The handshake capture (option 4) prompts for an output path. The file is saved as `{path}-01.cap` — airodump-ng automatically appends `-01` and `.cap`.
+
+    For example, entering `/tmp/capture` saves the file to:
+
+    ```text
+    /tmp/capture-01.cap
+    ```
+  </Accordion>
+
+  <Accordion title="How do I add more wordlists?">
+    You can use any wordlist file with option 7 (custom wordlist crack). Common sources:
+
+    - **Built-in:** `/usr/share/wordlists/rockyou.txt`
+    - **SecLists:**
+      ```bash
+      sudo apt-get install seclists
+      ```
+      Installs to `/usr/share/seclists/`
+    - **Custom generation:** Use option 9 (Create wordlist with crunch)
+  </Accordion>
+</AccordionGroup>

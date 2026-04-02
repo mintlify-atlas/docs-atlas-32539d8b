@@ -1,0 +1,74 @@
+---
+title: "Network Scanning"
+description: "Discovering hosts on a network with Nmap."
+---
+
+After gaining access to a network, the next step is host discovery — finding which IP addresses are live before probing individual services.
+
+<Warning>
+  Only scan networks you own or have explicit written authorization to test.
+</Warning>
+
+## Scan network with Nmap (option 11)
+
+<Steps>
+  <Step title="Find your subnet">
+    Once connected to the target network, find your assigned IP and subnet:
+
+    ```bash
+    ip addr show
+    ```
+
+    Example output: `192.168.1.45/24` — your subnet is `192.168.1.0/24`.
+  </Step>
+
+  <Step title="Select option 11 from the menu">
+    ```
+    Enter your choice: 11
+    Enter the target IP for Nmap scan: 192.168.1.0/24
+    ```
+
+    The underlying command executed:
+
+    ```bash
+    nmap -sP 192.168.1.0/24
+    ```
+
+    The `-sP` flag is a ping scan — it sends ICMP echo requests to discover live hosts without scanning ports.
+  </Step>
+
+  <Step title="Read the output">
+    Example output:
+
+    ```text
+    Starting Nmap 7.94 ( https://nmap.org )
+    Nmap scan report for 192.168.1.1
+    Host is up (0.0032s latency).
+    Nmap scan report for 192.168.1.10
+    Host is up (0.0041s latency).
+    Nmap scan report for 192.168.1.45
+    Host is up (0.00011s latency).
+    Nmap done: 256 IP addresses (3 hosts up) scanned in 2.45 seconds
+    ```
+
+    Each "Host is up" line is a live device on the network. The `.1` address is typically the router/gateway.
+  </Step>
+</Steps>
+
+## Targeting a single host
+
+You can also scan a single IP address instead of a subnet range:
+
+```
+Enter the target IP for Nmap scan: 192.168.1.1
+```
+
+This runs `nmap -sP 192.168.1.1` and confirms whether that specific host is reachable.
+
+<Note>
+  The `-sP` ping scan used here is host discovery only. It does not scan open ports or identify services. For deeper enumeration, use Nmap directly from the terminal with additional flags such as `-sV` (version detection) or `-A` (OS detection + scripts).
+</Note>
+
+<Tip>
+  Nmap may require root privileges for certain scan types. The script already runs under `sudo`, so all Nmap features are available.
+</Tip>

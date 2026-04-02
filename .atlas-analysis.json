@@ -1,0 +1,86 @@
+{
+  "projectType": "cli-tool",
+  "projectName": "WiFi Hacking",
+  "projectDescription": "A Python-based interactive CLI toolkit for wireless network security testing, supporting WEP, WPS, WPA, and WPA2 attacks alongside network scanning, brute-forcing, and web application testing tools on Kali Linux and compatible platforms.",
+  "theme": "aspen",
+  "primaryColor": "#fc0404",
+  "lightColor": "#fc7c7c",
+  "darkColor": null,
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "quickstart"
+            ]
+          },
+          {
+            "group": "Usage Guide",
+            "pages": [
+              "usage/monitor-mode",
+              "usage/wifi-attacks",
+              "usage/wps-attacks",
+              "usage/network-scanning",
+              "usage/advanced-tools"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "reference/commands",
+              "reference/dependencies",
+              "reference/supported-platforms"
+            ]
+          },
+          {
+            "group": "Help",
+            "pages": [
+              "troubleshooting",
+              "faq"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Interactive CLI menu with 18 built-in attack and scanning options",
+    "Wireless monitor mode management via airmon-ng",
+    "WPA/WPA2 handshake capture and cracking with aircrack-ng",
+    "WPS brute-force attacks using Reaver",
+    "Custom wordlist generation with Crunch",
+    "Network scanning with Nmap",
+    "Brute-force login attacks with Hydra",
+    "Phishing access point creation with Wifiphisher",
+    "Web server vulnerability scanning with Nikto",
+    "Directory enumeration with Gobuster",
+    "SQL injection testing with SQLMap",
+    "Metasploit framework integration",
+    "Automated dependency installation for Kali Linux and Debian-based systems"
+  ],
+  "publicApiSurface": [
+    "install_tools()",
+    "start_monitor_mode(interface)",
+    "stop_monitor_mode(interface)",
+    "scan_networks(interface)",
+    "get_handshake(interface, bssid, channel, path, packets)",
+    "crack_handshake_with_wordlist(handshake_path, wordlist_path)",
+    "crack_handshake_without_wordlist(handshake_path, essid)",
+    "create_wordlist(min_length, max_length, characters, output_path)",
+    "perform_wps_attack(interface, bssid)",
+    "scan_networks_with_nmap(target_ip)",
+    "run_metasploit_exploit(exploit_name)",
+    "perform_brute_force_login(target_ip, username, password_file)",
+    "perform_phishing_attack(interface, bssid)",
+    "scan_web_server_with_nikto(target_url)",
+    "listen_with_netcat(port)",
+    "brute_force_directories(target_url)",
+    "perform_sql_injection(target_url)",
+    "main()"
+  ]
+}

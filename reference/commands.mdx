@@ -1,0 +1,445 @@
+---
+title: "Command Reference"
+description: Complete reference for all 18 menu commands available in the WiFi Hacking CLI.
+---
+
+<Warning>
+  This tool is intended for authorized penetration testing and security research only. Unauthorized use against networks you do not own or have explicit permission to test is illegal.
+</Warning>
+
+## Summary table
+
+| # | Command | Inputs | Tool |
+|---|---------|--------|------|
+| 1 | Start monitor mode | interface | airmon-ng |
+| 2 | Stop monitor mode | interface | airmon-ng |
+| 3 | Scan networks | interface | airodump-ng |
+| 4 | Capture handshake | interface, bssid, channel, path, packets | airodump-ng, aireplay-ng |
+| 5 | Install wireless tools | _(none)_ | apt-get |
+| 6 | Crack handshake (rockyou.txt) | handshake_path | aircrack-ng |
+| 7 | Crack handshake with custom wordlist | handshake_path, wordlist_path | aircrack-ng |
+| 8 | Crack handshake without wordlist | handshake_path, essid | aircrack-ng |
+| 9 | Create wordlist | min_length, max_length, characters, output_path | crunch |
+| 10 | Perform WPS attack | interface, bssid | reaver |
+| 11 | Scan network with Nmap | target_ip | nmap |
+| 12 | Run Metasploit exploit | exploit_name | msfconsole |
+| 13 | Brute-force login with Hydra | target_ip, username, password_file | hydra |
+| 14 | Perform phishing attack with Wifiphisher | interface, bssid | wifiphisher |
+| 15 | Scan web server with Nikto | target_url | nikto |
+| 16 | Listen with Netcat | port | nc |
+| 17 | Brute-force directories with Gobuster | target_url | gobuster |
+| 18 | Perform SQL Injection with SQLMap | target_url | sqlmap |
+| 0 | Exit | _(none)_ | — |
+
+---
+
+## Command details
+
+<AccordionGroup>
+
+  <Accordion title="1 — Start monitor mode">
+    Puts the specified wireless interface into monitor mode and kills any processes that may interfere with packet capture (such as NetworkManager or wpa_supplicant).
+
+    **Input prompts**
+
+    ```text
+    Enter the interface:
+    ```
+
+    **Underlying command**
+
+    ```bash
+    airmon-ng start {interface} && airmon-ng check kill
+    ```
+
+    **Usage notes**
+
+    After running this command, the interface name typically changes (e.g., `wlan0` becomes `wlan0mon`). Use the new interface name for subsequent commands such as scan networks (3) and capture handshake (4).
+  </Accordion>
+
+  <Accordion title="2 — Stop monitor mode">
+    Takes the specified wireless interface out of monitor mode and restarts the NetworkManager service to restore normal connectivity.
+
+    **Input prompts**
+
+    ```text
+    Enter the interface:
+    ```
+
+    **Underlying command**
+
+    ```bash
+    airmon-ng stop {interface} && service network-manager restart
+    ```
+
+    **Usage notes**
+
+    Use the monitor-mode interface name (e.g., `wlan0mon`) as the input. After this command completes, the interface reverts to its original name and normal network connections are restored.
+  </Accordion>
+
+  <Accordion title="3 — Scan networks">
+    Scans for nearby wireless networks and displays them in a live table, including BSSID, channel, encryption type, and ESSID.
+
+    **Input prompts**
+
+    ```text
+    Enter the interface:
+    ```
+
+    **Underlying command**
+
+    ```bash
+    airodump-ng {interface} -M
+    ```
+
+    **Usage notes**
+
+    The `-M` flag enables manufacturer lookup for access points. The interface must already be in monitor mode (command 1). Press `Ctrl+C` to stop the scan. Note the BSSID and channel of your target network before proceeding to command 4.
+  </Accordion>
+
+  <Accordion title="4 — Capture handshake">
+    Captures a WPA/WPA2 four-way handshake from a target access point by simultaneously running airodump-ng to capture traffic and aireplay-ng (in a new xterm window) to send deauthentication frames, forcing clients to reconnect.
+
+    **Input prompts**
+
+    ```text
+    Enter the interface:
+    Enter the target BSSID:
+    Enter the channel:
+    Enter the path for output file:
+    Enter the number of packets:
+    ```
+
+    **Underlying command**
+
+    ```bash
+    airodump-ng {interface} --bssid {bssid} -c {channel} -w {path} | xterm -e aireplay-ng -0 {packets} -a {bssid} {interface}
+    ```
+
+    **Usage notes**
+
+    - `path` is the base filename for the capture file (e.g., `/tmp/capture`). airodump-ng appends `-01.cap`.
+    - `packets` is the number of deauth frames to send. A value of `0` sends frames continuously; `5` to `10` is typically sufficient.
+    - Requires `xterm` to be installed (included in command 5).
+    - A captured handshake is confirmed by the `WPA handshake:` line in the airodump-ng output.
+  </Accordion>
+
+  <Accordion title="5 — Install wireless tools">
+    Installs all tools required by this script using `apt-get`. This is the recommended first step on a fresh system.
+
+    **Input prompts**
+
+    _(none — runs immediately)_
+
+    **Underlying command**
+
+    ```bash
+    sudo apt-get install -y aircrack-ng crunch xterm wordlists reaver pixiewps bully wifite airodump-ng nmap metasploit-framework hydra wifiphisher nikto netcat gobuster ncat sqlmap
+    ```
+
+    Each package is installed individually in sequence. See the [Dependencies](/reference/dependencies) page for a full breakdown of each tool's purpose.
+  </Accordion>
+
+  <Accordion title="6 — Crack handshake (rockyou.txt)">
+    Attempts to crack a captured WPA/WPA2 handshake using the rockyou.txt wordlist, which is included in the `wordlists` package at `/usr/share/wordlists/rockyou.txt`.
+
+    **Input prompts**
+
+    ```text
+    Enter the handshake file path:
+    ```
+
+    **Underlying command**
+
+    ```bash
+    aircrack-ng {handshake_path} -w /usr/share/wordlists/rockyou.txt
+    ```
+
+    **Usage notes**
+
+    - The handshake file is the `.cap` file written by command 4 (e.g., `/tmp/capture-01.cap`).
+    - The `wordlists` package must be installed and rockyou.txt must be unzipped. See the [Dependencies](/reference/dependencies) page.
+    - If the password is not found in rockyou.txt, use command 7 with a custom wordlist or command 9 to generate one.
+  </Accordion>
+
+  <Accordion title="7 — Crack handshake with custom wordlist">
+    Attempts to crack a captured WPA/WPA2 handshake using a user-specified wordlist file.
+
+    **Input prompts**
+
+    ```text
+    Enter the handshake file path:
+    Enter the wordlist file path:
+    ```
+
+    **Underlying command**
+
+    ```bash
+    aircrack-ng {handshake_path} -w {wordlist_path}
+    ```
+
+    **Usage notes**
+
+    Use this command when rockyou.txt (command 6) does not contain the target password. A custom wordlist can be generated with command 9.
+  </Accordion>
+
+  <Accordion title="8 — Crack handshake without wordlist">
+    Filters a capture file by ESSID and attempts to crack the matching WPA/WPA2 handshake.
+
+    **Input prompts**
+
+    ```text
+    Enter the handshake file path:
+    Enter the ESSID:
+    ```
+
+    **Underlying command**
+
+    ```bash
+    aircrack-ng {handshake_path} -e {essid}
+    ```
+
+    **Usage notes**
+
+    The `-e` flag tells aircrack-ng to filter by ESSID (network name) rather than by BSSID. This is useful when a capture file contains handshakes from multiple networks. Note: a wordlist is still required for cracking — without one on the system, aircrack-ng will report that no dictionary was supplied. Use command 7 to specify a wordlist path explicitly.
+  </Accordion>
+
+  <Accordion title="9 — Create wordlist">
+    Generates a custom wordlist using crunch with a specified character set and password length range.
+
+    **Input prompts**
+
+    ```text
+    Enter the minimum length of passwords:
+    Enter the maximum length of passwords:
+    Enter characters for the wordlist:
+    Enter the output path for the wordlist:
+    ```
+
+    **Underlying command**
+
+    ```bash
+    crunch {min_length} {max_length} {characters} -o {output_path}
+    ```
+
+    **Usage notes**
+
+    - `characters` is a string of characters to use (e.g., `abc123` or `abcdefghijklmnopqrstuvwxyz0123456789`).
+    - Large character sets combined with long password lengths can produce very large files (gigabytes or more).
+    - The generated wordlist can be used with commands 7 or 6.
+  </Accordion>
+
+  <Accordion title="10 — Perform WPS attack">
+    Performs a WPS PIN brute-force attack against a target access point using reaver, attempting to recover the WPA/WPA2 passphrase via the WPS protocol.
+
+    **Input prompts**
+
+    ```text
+    Enter the interface:
+    Enter the BSSID:
+    ```
+
+    **Underlying command**
+
+    ```bash
+    reaver -i {interface} -b {bssid} -vv
+    ```
+
+    **Usage notes**
+
+    - The `-vv` flag enables verbose output.
+    - The interface must be in monitor mode (command 1).
+    - This attack only works against access points with WPS enabled and not locked.
+    - The attack can take several hours to complete.
+  </Accordion>
+
+  <Accordion title="11 — Scan network with Nmap">
+    Performs a ping sweep of the target IP range to discover live hosts on the network.
+
+    **Input prompts**
+
+    ```text
+    Enter the target IP for Nmap scan:
+    ```
+
+    **Underlying command**
+
+    ```bash
+    nmap -sP {target_ip}
+    ```
+
+    **Usage notes**
+
+    - `-sP` (ping scan) discovers hosts without port scanning. Use CIDR notation for a range (e.g., `192.168.1.0/24`).
+    - For a full port scan, run nmap manually with additional flags such as `-sV` or `-A`.
+
+    <Note>
+      In newer versions of Nmap, `-sP` has been replaced by `-sn`. The behavior is the same.
+    </Note>
+  </Accordion>
+
+  <Accordion title="12 — Run Metasploit exploit">
+    Launches msfconsole, loads a specified exploit module, and immediately runs it.
+
+    **Input prompts**
+
+    ```text
+    Enter the Metasploit exploit name:
+    ```
+
+    **Underlying command**
+
+    ```bash
+    msfconsole -x 'use {exploit_name}; run'
+    ```
+
+    **Usage notes**
+
+    - `exploit_name` is the full module path (e.g., `exploit/multi/handler` or `auxiliary/scanner/portscan/tcp`).
+    - Required options (such as `RHOSTS` or `LHOST`) are not set by this command. For full control over module options, launch msfconsole manually.
+  </Accordion>
+
+  <Accordion title="13 — Brute-force login with Hydra">
+    Performs an SSH brute-force login attack against a target IP using a specified username and password file.
+
+    **Input prompts**
+
+    ```text
+    Enter the target IP for Hydra brute-force:
+    Enter the username:
+    Enter the password file path:
+    ```
+
+    **Underlying command**
+
+    ```bash
+    hydra -l {username} -P {password_file} {target_ip} ssh
+    ```
+
+    **Usage notes**
+
+    - `-l` specifies a single username. To test multiple usernames, run hydra manually with `-L`.
+    - `-P` specifies the path to a password list file (one password per line).
+    - This command targets SSH only. To target other services (HTTP, FTP, etc.), run hydra manually with the appropriate service argument.
+  </Accordion>
+
+  <Accordion title="14 — Perform phishing attack with Wifiphisher">
+    Creates a rogue access point mimicking the target BSSID and launches a phishing page to capture credentials from clients that connect.
+
+    **Input prompts**
+
+    ```text
+    Enter the interface:
+    Enter the BSSID:
+    ```
+
+    **Underlying command**
+
+    ```bash
+    wifiphisher -i {interface} --fakeap -b {bssid}
+    ```
+
+    **Usage notes**
+
+    - Requires two wireless interfaces in most scenarios (one for the rogue AP, one for internet access).
+    - The interface must support AP mode (access point mode), not just monitor mode.
+  </Accordion>
+
+  <Accordion title="15 — Scan web server with Nikto">
+    Performs a comprehensive web server vulnerability scan against the target URL, checking for outdated software, misconfigurations, and common vulnerabilities.
+
+    **Input prompts**
+
+    ```text
+    Enter the target URL:
+    ```
+
+    **Underlying command**
+
+    ```bash
+    nikto -h {target_url}
+    ```
+
+    **Usage notes**
+
+    - `target_url` can be a hostname, IP address, or full URL (e.g., `http://192.168.1.1`).
+    - Nikto scans are not stealthy and will typically appear in server logs.
+  </Accordion>
+
+  <Accordion title="16 — Listen with Netcat">
+    Opens a TCP listener on the specified port using Netcat, which can be used to receive reverse shell connections or transfer data.
+
+    **Input prompts**
+
+    ```text
+    Enter the port to listen on:
+    ```
+
+    **Underlying command**
+
+    ```bash
+    nc -lvp {port}
+    ```
+
+    **Usage notes**
+
+    - `-l` listen mode, `-v` verbose, `-p` port.
+    - Press `Ctrl+C` to stop listening.
+    - Ports below 1024 require root privileges.
+  </Accordion>
+
+  <Accordion title="17 — Brute-force directories with Gobuster">
+    Performs directory and file enumeration against a web server using a built-in medium wordlist.
+
+    **Input prompts**
+
+    ```text
+    Enter the target URL:
+    ```
+
+    **Underlying command**
+
+    ```bash
+    gobuster dir -u {target_url} -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt
+    ```
+
+    **Usage notes**
+
+    - The wordlist path `/usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt` is included with the `wordlists` package (command 5).
+    - `target_url` must include the scheme (e.g., `http://192.168.1.1`).
+    - To use a different wordlist or add file extensions, run gobuster manually.
+  </Accordion>
+
+  <Accordion title="18 — Perform SQL Injection with SQLMap">
+    Automatically detects and exploits SQL injection vulnerabilities on the target URL.
+
+    **Input prompts**
+
+    ```text
+    Enter the target URL for SQL Injection:
+    ```
+
+    **Underlying command**
+
+    ```bash
+    sqlmap -u {target_url} --batch
+    ```
+
+    **Usage notes**
+
+    - `--batch` runs SQLMap non-interactively, using default answers for all prompts.
+    - `target_url` should include query parameters (e.g., `http://example.com/page?id=1`).
+    - For more targeted testing (specific parameters, POST data, cookies), run sqlmap manually.
+  </Accordion>
+
+  <Accordion title="0 — Exit">
+    Exits the script cleanly.
+
+    **Input prompts**
+
+    _(none)_
+
+    The script prints `Exiting...` and terminates the main loop.
+  </Accordion>
+
+</AccordionGroup>

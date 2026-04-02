@@ -1,0 +1,122 @@
+---
+title: "Installation"
+description: "Install WiFi Hacking on Kali Linux, Ubuntu, Parrot OS, or Termux."
+---
+
+## Prerequisites
+
+Before installing, confirm you have the following:
+
+- **Python 3** — the script requires Python 3 (`python3 --version` to check)
+- **Git** — used to clone the repository
+- **sudo / root access** — required to run the tool and install packages
+- **Wireless adapter with monitor mode support** — your adapter must support monitor mode and packet injection (e.g., Alfa AWUS036ACH, Alfa AWUS036NHA)
+
+<Warning>
+  WiFi Hacking must be run with root or sudo privileges. Most features call underlying tools (airmon-ng, airodump-ng, reaver, etc.) that require elevated permissions. Running without root will fail silently or produce errors.
+</Warning>
+
+## Install the tool
+
+<Tabs>
+  <Tab title="Kali Linux / Ubuntu / Parrot OS">
+    <Steps>
+      <Step title="Update packages and install git">
+        ```bash
+        sudo apt-get update && apt-get install git
+        ```
+      </Step>
+      <Step title="Clone the repository">
+        ```bash
+        git clone https://github.com/akashblackhat/wifi-hacking.py.git
+        ```
+      </Step>
+      <Step title="Enter the project directory">
+        ```bash
+        ls
+        cd wifi-hacking.py
+        ls
+        ```
+      </Step>
+      <Step title="Launch the tool">
+        ```bash
+        sudo python3 wifi-hacking.py
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+  <Tab title="Root Termux (Android)">
+    <Steps>
+      <Step title="Update packages and install dependencies">
+        ```bash
+        apt update
+        apt install git
+        apt install python
+        apt install python3
+        apt install cmatrix
+        ```
+      </Step>
+      <Step title="Clone the repository">
+        ```bash
+        git clone https://github.com/akashblackhat/wifi-hacking.py.git
+        ```
+      </Step>
+      <Step title="Enter the project directory">
+        ```bash
+        ls
+        cd wifi-hacking.py
+        ls
+        ```
+      </Step>
+      <Step title="Launch the tool">
+        ```bash
+        python3 wifi-hacking.py
+        ```
+
+        <Note>
+          On rooted Termux, you may not need the `sudo` prefix — the session already runs as root. If commands fail with permission errors, prefix them with `sudo` or switch to a root shell with `su`.
+        </Note>
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+## Verify the installation
+
+After running the launch command, you should see the ASCII banner and the main menu printed in your terminal:
+
+```text
+██╗    ██╗██╗███████╗██╗   ██╗  ██╗ █████╗  ██████╗██╗  ██╗██╗███╗   ██╗ ██████╗
+...
+        Menu:
+        1) Start monitor mode
+        2) Stop monitor mode
+        3) Scan networks
+        4) Capture handshake
+        5) Install wireless tools
+        ...
+        0) Exit
+-------------------------------------------------------------------------
+
+Enter your choice:
+```
+
+If the menu appears, the tool is installed and ready. If Python reports a missing module or a command is not found, proceed to step 5 in the menu to install the required wireless tools automatically.
+
+## Install wireless tools (first run)
+
+On a fresh system, run option **5** from the menu to install all required tools in one step:
+
+```text
+Enter your choice: 5
+```
+
+This runs the following command for each required package:
+
+```bash
+sudo apt-get install -y aircrack-ng crunch xterm wordlists reaver pixiewps bully wifite airodump-ng nmap metasploit-framework hydra wifiphisher nikto netcat gobuster ncat sqlmap
+```
+
+<Tip>
+  On Kali Linux, most of these tools are pre-installed. Running option 5 ensures any missing packages are installed without affecting existing ones.
+</Tip>

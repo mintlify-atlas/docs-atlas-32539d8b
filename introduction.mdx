@@ -1,0 +1,60 @@
+---
+title: "WiFi Hacking Toolkit"
+description: "A Python-based interactive CLI for wireless network security testing on Kali Linux and compatible platforms."
+---
+
+WiFi Hacking is an open-source Python script that bundles 18 wireless network security testing capabilities into a single interactive CLI menu. Built for security researchers and penetration testers, it wraps industry-standard Kali Linux tools — aircrack-ng, Reaver, Nmap, Hydra, Metasploit, and more — behind a unified interface so you can move quickly through a test engagement without switching between separate tools.
+
+<Warning>
+  This tool is intended exclusively for authorized penetration testing and educational research. Only use it against networks and systems you own or have explicit written permission to test. Unauthorized access to computer networks is illegal in most jurisdictions.
+</Warning>
+
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/installation">
+    Get WiFi Hacking running on Kali Linux, Ubuntu, Parrot OS, or Termux in minutes.
+  </Card>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Launch the tool and run your first network scan step by step.
+  </Card>
+  <Card title="Usage Guide" icon="terminal" href="/usage/monitor-mode">
+    Learn every menu option — from monitor mode to WPA handshake cracking.
+  </Card>
+  <Card title="Command Reference" icon="list" href="/reference/commands">
+    Full reference for all 18 built-in commands and their parameters.
+  </Card>
+</CardGroup>
+
+## What's included
+
+WiFi Hacking integrates the following capabilities in one menu-driven script:
+
+| # | Feature | Underlying tool |
+|---|---------|-----------------|
+| 1–2 | Start / stop wireless monitor mode | airmon-ng |
+| 3 | Scan nearby wireless networks | airodump-ng |
+| 4 | Capture WPA/WPA2 handshakes | airodump-ng + aireplay-ng |
+| 5 | Install all required tools automatically | apt-get |
+| 6–8 | Crack captured handshakes (rockyou, custom wordlist, or ESSID) | aircrack-ng |
+| 9 | Generate custom wordlists | crunch |
+| 10 | WPS brute-force attacks | reaver |
+| 11 | Network host discovery | nmap |
+| 12 | Run Metasploit exploits | msfconsole |
+| 13 | SSH brute-force login | hydra |
+| 14 | Evil-twin phishing attack | wifiphisher |
+| 15 | Web server vulnerability scan | nikto |
+| 16 | Port listener / reverse shell staging | netcat |
+| 17 | Web directory enumeration | gobuster |
+| 18 | SQL injection testing | sqlmap |
+
+## Supported platforms
+
+- Kali Linux (primary)
+- BlackArch Linux
+- Ubuntu
+- Parrot OS
+- Kali NetHunter
+- Termux (rooted Android devices)
+
+## License
+
+WiFi Hacking is released under the [MIT License](https://github.com/akashblackhat/wifi-hacking.py/blob/main/LICENSE).
